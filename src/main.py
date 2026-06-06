@@ -26,24 +26,20 @@ def main():
         "Turkish Airlines": turkish.check_sales,
     }
 
-    results = []
     sale_hits = []
 
     for airline, scraper in scrapers.items():
         try:
             result = scraper()
-            line = f"{airline}: {result}"
-            print(line)
-            results.append(line)
 
-            # Detect a sale (simple keyword match for now)
-            if "sale" in result.lower() or "offer" in result.lower():
-                sale_hits.append(line)
+            print(f"{airline}: {result}")
+
+            # NEW LOGIC: only add if scraper returned a real sale
+            if result:
+                sale_hits.append(f"{airline}: {result}")
 
         except Exception as e:
-            error_line = f"{airline}: Error running scraper → {e}"
-            print(error_line)
-            results.append(error_line)
+            print(f"{airline}: Error running scraper → {e}")
 
     # Only send email if at least one sale is detected
     if sale_hits:
