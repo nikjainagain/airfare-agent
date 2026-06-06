@@ -27,6 +27,7 @@ def main():
     }
 
     results = []
+    sale_hits = []
 
     for airline, scraper in scrapers.items():
         try:
@@ -34,22 +35,23 @@ def main():
             line = f"{airline}: {result}"
             print(line)
             results.append(line)
+
+            # Detect a sale (simple keyword match for now)
+            if "sale" in result.lower() or "offer" in result.lower():
+                sale_hits.append(line)
+
         except Exception as e:
             error_line = f"{airline}: Error running scraper → {e}"
             print(error_line)
             results.append(error_line)
 
-    # Build email body
-    email_body = "\n".join(results)
-
-    # Send email
-    send_email(
-        subject="Daily Airline Sales Report",
-        body=email_body
-    )
-
-
-if __name__ == "__main__":
-    main()
-
-          
+    # Only send email if at least one sale is detected
+    if sale_hits:
+        email_body = "\n".join(sale_hits)
+        send_email(
+            subject="Flash Sale Detected!",
+            body=email_body
+        )
+        print("\nEmail sent because a sale was detected.")
+    else:
+        print("\nNo sales detected. No email sent.")
