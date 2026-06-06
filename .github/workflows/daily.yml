@@ -8,6 +8,8 @@ on:
 jobs:
   run-monitor:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout repo
@@ -18,10 +20,5 @@ jobs:
         with:
           python-version: "3.10"
 
-      
-
       - name: Run airfare monitor
         run: python src/main.py
-
-      - name: Show directory structure (debug)
-        run: ls -R .
