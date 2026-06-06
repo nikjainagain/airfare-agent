@@ -1,23 +1,38 @@
 import urllib.request
+from utils.keyword_scoring import score_text
 
 def check_sales():
     url = "https://www.lufthansa.com/in/en/flight-deals"
 
-    core = ["sale", "offer", "discount", "deal", "promo"]
-    lh_specific = ["companion", "global sale", "europe special", "saver fare",
-                   "premium economy", "business class", "best price"]
-    route_specific = ["mumbai", "bom", "frankfurt", "fra", "munich", "muc", "new york", "jfk"]
+    keyword_groups = {
+        "core": {
+            "sale": 2, "offer": 2, "discount": 2, "deal": 2, "promo": 2
+        },
+        "airline": {
+            "companion": 4, "global sale": 4, "europe special": 4,
+            "saver fare": 3, "premium economy": 3, "business class": 3,
+            "best price": 3
+        },
+        "route": {
+            "mumbai": 5, "bom": 5,
+            "frankfurt": 5, "fra": 5,
+            "munich": 5, "muc": 5,
+            "new york": 5, "jfk": 5
+        }
+    }
 
     try:
         response = urllib.request.urlopen(url, timeout=10)
-        html = response.read().decode("utf-8").lower()
+        html = response.read().decode("utf-8")
 
-        if any(k in html for k in core + lh_specific + route_specific):
-            return "Lufthansa: Sale‑related keywords detected for BOM→Europe/NYC."
+        score, hits = score_text(html, keyword_groups)
+
+        if score >= 10:
+            return f"Lufthansa SALE detected (score {score}, hits: {hits})"
         else:
-            return "Lufthansa: No sale detected for BOM routes."
+            return f"Lufthansa: No sale (score {score})"
 
     except Exception as e:
-        return f"Lufthansa: Error checking sale → {e}"
+        return f"Lufthansa: Error → {e}"
 
 
