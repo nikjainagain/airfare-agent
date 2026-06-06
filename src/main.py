@@ -9,6 +9,8 @@ from airlines import (
     turkish,
 )
 
+from alerts.email_alert import send_email
+
 
 def main():
     print("Checking airline sales...\n")
@@ -24,13 +26,30 @@ def main():
         "Turkish Airlines": turkish.check_sales,
     }
 
+    results = []
+
     for airline, scraper in scrapers.items():
         try:
             result = scraper()
-            print(f"{airline}: {result}")
+            line = f"{airline}: {result}"
+            print(line)
+            results.append(line)
         except Exception as e:
-            print(f"{airline}: Error running scraper → {e}")
+            error_line = f"{airline}: Error running scraper → {e}"
+            print(error_line)
+            results.append(error_line)
+
+    # Build email body
+    email_body = "\n".join(results)
+
+    # Send email
+    send_email(
+        subject="Daily Airline Sales Report",
+        body=email_body
+    )
 
 
 if __name__ == "__main__":
     main()
+
+          
