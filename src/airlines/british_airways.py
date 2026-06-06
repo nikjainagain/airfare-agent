@@ -1,22 +1,36 @@
 import urllib.request
+from utils.keyword_scoring import score_text
 
 def check_sales():
     url = "https://www.britishairways.com/en-in/offers/flights"
 
-    core = ["sale", "offer", "discount", "deal", "promo"]
-    ba_specific = ["world sale", "global sale", "flight sale", "special fares",
-                   "lowest fares", "club world", "premium economy"]
-    route_specific = ["mumbai", "bom", "london", "lhr", "new york", "jfk"]
+    keyword_groups = {
+        "core": {
+            "sale": 2, "offer": 2, "discount": 2, "deal": 2, "promo": 2
+        },
+        "airline": {
+            "world sale": 4, "global sale": 4, "flight sale": 4,
+            "special fares": 3, "lowest fares": 3,
+            "club world": 3, "premium economy": 3
+        },
+        "route": {
+            "mumbai": 5, "bom": 5,
+            "london": 5, "lhr": 5,
+            "new york": 5, "jfk": 5
+        }
+    }
 
     try:
         response = urllib.request.urlopen(url, timeout=10)
-        html = response.read().decode("utf-8").lower()
+        html = response.read().decode("utf-8")
 
-        if any(k in html for k in core + ba_specific + route_specific):
-            return "BA: Sale‑related keywords detected for BOM→Europe/NYC."
+        score, hits = score_text(html, keyword_groups)
+
+        if score >= 10:
+            return f"BA SALE detected (score {score}, hits: {hits})"
         else:
-            return "BA: No sale detected for BOM routes."
+            return f"BA: No sale (score {score})"
 
     except Exception as e:
-        return f"BA: Error checking sale → {e}"
+        return f"BA: Error → {e}"
 
